@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dự Đoán Bệnh Tim</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='img/ai.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <!-- Sử dụng Bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Thư viện Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      /* Định dạng kích thước cho phần hiển thị kết quả */
+      .result-container {
+        max-width: 400px;
+      }
+
+      #result-content img {
+        max-width: 100%; /* Chiều rộng tối đa là 100% của khung chứa */
+        height: auto; /* Đảm bảo tỷ lệ khung hình bảo toàn */
+        display: block; /* Đảm bảo hình ảnh hiển thị là một khối */
+        margin: 0 auto; /* Canh giữa hình ảnh bên trong khung chứa */
+      }
+
+      /* Định dạng cho div wrapper */
+      .scrollable-wrapper {
+        max-height: 78vh; /* Chiều cao tối đa */
+        overflow-y: auto; /* Cho phép cuộn dọc khi nội dung vượt quá */
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Biểu tượng chuyển đổi chế độ -->
+    <div class="toggle-dark-mode" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+      <!-- Biểu tượng khi ở chế độ sáng -->
+      <i class="fas fa-sun" style="display: none"></i>
+      <!-- Biểu tượng khi ở chế độ tối -->
+    </div>
+    <!-- Nội dung trang web -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="container">
+            <h1>Thông Tin Bệnh Nhân</h1>
+            <div class="scrollable-wrapper">
+              <form id="prediction-form" action="/predict" method="POST">
+                <label for="sex">1. Giới Tính:</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="sex_1" name="sex" value="1" />
+                  <label for="sex_1">Nam</label>
+                  <input type="checkbox" id="sex_0" name="sex" value="0" />
+                  <label for="sex_0">Nữ</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="general_health"
+                  >2. Tình trạng sức khỏe tổng thể:</label
+                >
+                <select id="general_health" name="general_health" required>
+                  <option value="">--Chọn--</option>
+                  <option value="3">Rất Tốt</option>
+                  <option value="2">Tốt</option>
+                  <option value="4">Xuất Sắc</option>
+                  <option value="1">Cân Bằng</option>
+                  <option value="0">Kém</option></select
+                ><br /><br />
+                <label for="physical_health_days"
+                  >3. Số ngày cảm thấy sức khỏe thể chất kém:</label
+                >
+                <select
+                  name="physical_health_days"
+                  id="physical_health_days"
+                  required
+                >
+                  <option value="">--Chọn--</option>
+                  {% for i in range(0, 31) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}</select
+                ><br /><br />
+                <label for="mental_health_days"
+                  >4. Số ngày cảm thấy sức khỏe tinh thần kém:</label
+                >
+                <select
+                  name="mental_health_days"
+                  id="mental_health_days"
+                  required
+                >
+                  <option value="">--Chọn--</option>
+                  {% for i in range(0, 31) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}</select
+                ><br /><br />
+                <label for="physical_activities">5. Hoạt động thể chất:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="physical_activities_1"
+                    name="physical_activities"
+                    value="1"
+                  />
+                  <label for="physical_activities_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="physical_activities_0"
+                    name="physical_activities"
+                    value="0"
+                  />
+                  <label for="physical_activities_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="sleep_hours"
+                  >6. Số giờ ngủ trung bình mỗi đêm:</label
+                >
+                <select name="sleep_hours" id="sleep_hours" required>
+                  <option value="">--Chọn--</option>
+                  {% for i in range(1, 25) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}</select
+                ><br /><br />
+                <label for="had_stroke">7. Đã từng bị đột quỵ:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_stroke_1"
+                    name="had_stroke"
+                    value="1"
+                  />
+                  <label for="had_stroke_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_stroke_0"
+                    name="had_stroke"
+                    value="0"
+                  />
+                  <label for="had_stroke_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_asthma">8. Đã từng bị hen suyễn:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_asthma_1"
+                    name="had_asthma"
+                    value="1"
+                  />
+                  <label for="had_asthma_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_asthma_0"
+                    name="had_asthma"
+                    value="0"
+                  />
+                  <label for="had_asthma_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_skin_cancer">9. Đã từng bị ung thư da:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_skin_cancer_1"
+                    name="had_skin_cancer"
+                    value="1"
+                  />
+                  <label for="had_skin_cancer_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_skin_cancer_0"
+                    name="had_skin_cancer"
+                    value="0"
+                  />
+                  <label for="had_skin_cancer_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_depressive_disorder"
+                  >10. Đã từng bị rối loạn trầm cảm:</label
+                >
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_depressive_disorder_1"
+                    name="had_depressive_disorder"
+                    value="1"
+                  />
+                  <label for="had_depressive_disorder_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_depressive_disorder_0"
+                    name="had_depressive_disorder"
+                    value="0"
+                  />
+                  <label for="had_depressive_disorder_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_kidney_disease"
+                  >11. Đã từng bị bệnh thận:</label
+                >
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_kidney_disease_1"
+                    name="had_kidney_disease"
+                    value="1"
+                  />
+                  <label for="had_kidney_disease_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_kidney_disease_0"
+                    name="had_kidney_disease"
+                    value="0"
+                  />
+                  <label for="had_kidney_disease_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_arthritis">12. Đã từng bị viêm khớp:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="had_arthritis_1"
+                    name="had_arthritis"
+                    value="1"
+                  />
+                  <label for="had_arthritis_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="had_arthritis_0"
+                    name="had_arthritis"
+                    value="0"
+                  />
+                  <label for="had_arthritis_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="had_diabetes">13. Đã từng bị tiểu đường:</label>
+                <select id="had_diabetes" name="had_diabetes" required>
+                  <option value="">--Chọn--</option>
+                  <option value="1">Có</option>
+                  <option value="0">Không</option>
+                  <option value="2">
+                    Không, tiền đái tháo đường hoặc đang ở biên độ tiểu đường
+                  </option>
+                  <option value="4">
+                    Có, nhưng chỉ khi mang thai (nữ)
+                  </option></select
+                ><br /><br />
+                <label for="difficulty_walking"
+                  >14. Có khó khăn khi đi bộ:</label
+                >
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="difficulty_walking_1"
+                    name="difficulty_walking"
+                    value="1"
+                  />
+                  <label for="difficulty_walking_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="difficulty_walking_0"
+                    name="difficulty_walking"
+                    value="0"
+                  />
+                  <label for="difficulty_walking_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="smoker_status">15. Tình trạng hút thuốc:</label>
+                <select id="smoker_status" name="smoker_status" required>
+                  <option value="">--Chọn--</option>
+                  <option value="0">Không bao giờ hút thuốc</option>
+                  <option value="1">Ngừng hút thuốc</option>
+                  <option value="4">Hút mỗi ngày</option>
+                  <option value="3">Hút một số ngày</option></select
+                ><br /><br />
+                <label for="race_ethnicity_category"
+                  >16. Chủng tộc/dân tộc:</label
+                >
+                <select
+                  id="race_ethnicity_category"
+                  name="race_ethnicity_category"
+                  required
+                >
+                  <option value="">--Chọn--</option>
+                  <option value="1">Người Châu Á</option>
+                  <option value="4">Người Da Trắng</option>
+                  <option value="0">Người Hispanic</option>
+                  <option value="3">Người Da Đen</option>
+                  <option value="2">Khác</option></select
+                ><br /><br />
+                <label for="age_category">17. Nhóm tuổi:</label>
+                <select id="age_category" name="age_category" required>
+                  <option value="">--Chọn--</option>
+                  <option value="0">Tuổi 18 đến 24</option>
+                  <option value="1">Tuổi 25 đến 29</option>
+                  <option value="2">Tuổi 30 đến 34</option>
+                  <option value="3">Tuổi 35 đến 39</option>
+                  <option value="4">Tuổi 40 đến 44</option>
+                  <option value="5">Tuổi 45 đến 49</option>
+                  <option value="6">Tuổi 50 đến 54</option>
+                  <option value="7">Tuổi 55 đến 59</option>
+                  <option value="8">Tuổi 60 đến 64</option>
+                  <option value="9">Tuổi 65 đến 69</option>
+                  <option value="10">Tuổi 70 đến 74</option>
+                  <option value="11">Tuổi 75 đến 79</option>
+                  <option value="12">Tuổi 80 trở lên</option></select
+                ><br /><br />
+                <label for="bmi">18. Chỉ số BMI:</label>
+                <select name="bmi" id="bmi">
+                  <option value="">--Chọn--</option>
+                  <option value="0">Nhỏ hơn 18,5</option>
+                  <option value="1">Từ 18,5 - 24,9</option>
+                  <option value="2">Từ 25 - 29,9</option>
+                  <option value="3">Từ 30 trở lên</option></select
+                ><br /><br />
+                <label for="alcohol_drinkers">19. Uống rượu bia:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="alcohol_drinkers_1"
+                    name="alcohol_drinkers"
+                    value="1"
+                  />
+                  <label for="alcohol_drinkers_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="alcohol_drinkers_0"
+                    name="alcohol_drinkers"
+                    value="0"
+                  />
+                  <label for="alcohol_drinkers_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+                <label for="covid_pos">20. Đã từng mắc COVID-19:</label>
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="covid_pos_1"
+                    name="covid_pos"
+                    value="1"
+                  />
+                  <label for="covid_pos_1">Có</label>
+                  <input
+                    type="checkbox"
+                    id="covid_pos_0"
+                    name="covid_pos"
+                    value="0"
+                  />
+                  <label for="covid_pos_0">Không</label>
+                  <span class="error-message" style="display: none"
+                    >Vui lòng chọn ít nhất một tùy chọn.</span
+                  >
+                </div>
+                <br />
+
+                <!-- ... -->
+
+                <input type="submit" value="Dự Đoán" />
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="container result-container">
+            <!-- Phần hiển thị kết quả -->
+            <center><h2>Mô Hình AI Dự Đoán</h2></center>
+
+            <div class="scrollable-wrapper">
+              <!-- Thêm hình ảnh Bác sĩ AI -->
+              <div class="doctor-image">
+                <center>
+                  <img
+                    src="{{ url_for('static', filename='img/ai.png') }}"
+                    alt="Bác sĩ AI"
+                    width="300px"
+                  />
+                  <img
+                    src="{{ url_for('static', filename='img/song.webp') }}"
+                    width="200px"
+                  />
+                </center>
+              </div>
+              <div id="result-content">
+                <!-- Nội dung kết quả sẽ được thêm vào đây -->
+                {% if result %}
+                <h2>{{ result }}</h2>
+                {% if result == "AI dự đoán: Bạn có khả năng mắc bệnh tim!" %}
+                <img
+                  src="{{ url_for('static', filename='img/benh_tim.jpg') }}"
+                />
+                <h3>Hãy tham khảo ý kiến của bác sĩ ngay lập tức:</h3>
+                <p>
+                  Bệnh tim có thể gây ra những biến chứng nghiêm trọng nếu không
+                  được chăm sóc kịp thời và điều trị đúng cách. Hãy tìm kiếm sự
+                  chăm sóc y tế chuyên nghiệp để được đánh giá tình trạng sức
+                  khỏe của bạn và nhận các khuyến nghị cụ thể.
+                </p>
+                <h3>Thay đổi lối sống lành mạnh:</h3>
+                <img
+                  src="{{ url_for('static', filename='img/healthy_lifestyle.jpg') }}"
+                  alt="Healthy Lifestyle"
+                />
+                <ul>
+                  <li>
+                    Tập thể dục đều đặn: Thực hiện các hoạt động thể chất như đi
+                    bộ, đạp xe, hoặc aerobic để tăng cường sức khỏe tim mạch.
+                  </li>
+                  <li>
+                    Ăn uống cân đối: Hạn chế đường, chất béo bão hòa và natri.
+                    Tăng cường tiêu thụ rau quả, ngũ cốc nguyên hạt và chất
+                    chống oxy hóa.
+                  </li>
+                  <li>
+                    Hạn chế hút thuốc và uống rượu: Hút thuốc lá và uống rượu có
+                    thể gây tổn hại cho sức khỏe tim mạch. Hãy hạn chế hoặc
+                    tránh xa những thói quen này.
+                  </li>
+                </ul>
+                {% else %}
+                <img src="{{ url_for('static', filename='img/like.webp') }}" />
+                <p>
+                  Để duy trì sức khỏe tim mạch tốt, hãy tiếp tục duy trì lối
+                  sống lành mạnh và thực hiện các biện pháp phòng tránh bệnh
+                  tim. Dưới đây là một số gợi ý:
+                </p>
+                <h3>Lối sống lành mạnh:</h3>
+                <img
+                  src="{{ url_for('static', filename='img/healthy_lifestyle.jpg') }}"
+                  alt="Healthy Lifestyle"
+                />
+                <ul>
+                  <li>
+                    Thực hiện các hoạt động thể chất đều đặn như đi bộ, chạy bộ
+                    hoặc tập thể dục hàng ngày.
+                  </li>
+                  <li>Ưu tiên ăn uống cân đối và giàu chất dinh dưỡng.</li>
+                  <li>Giữ cho cân nặng và huyết áp ở mức bình thường.</li>
+                  <li>Tránh hút thuốc lá và giảm cân nặng nếu cần thiết.</li>
+                  <li>Thực hiện các kiểm tra sức khỏe định kỳ.</li>
+                </ul>
+                {% endif %} {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function toggleDarkMode() {
+        var body = document.body;
+        body.classList.toggle("dark-mode");
+      }
+
+      // Lấy tất cả các nhóm checkbox
+      var checkboxGroups = document.querySelectorAll(".checkbox-group");
+
+      // Lặp qua từng nhóm checkbox
+      checkboxGroups.forEach(function (group) {
+        // Lấy tất cả các checkbox trong nhóm
+        var checkboxes = group.querySelectorAll('input[type="checkbox"]');
+
+        // Lặp qua từng checkbox trong nhóm
+        checkboxes.forEach(function (checkbox) {
+          // Xử lý sự kiện khi checkbox được chọn
+          checkbox.addEventListener("change", function () {
+            // Nếu checkbox được chọn
+            if (this.checked) {
+              // Loại bỏ tích chọn của các checkbox khác trong cùng nhóm
+              checkboxes.forEach(function (otherCheckbox) {
+                if (otherCheckbox !== checkbox) {
+                  otherCheckbox.checked = false;
+                }
+              });
+            }
+          });
+        });
+      });
+    </script>
+
+    <script>
+      // Lấy form và nút gửi
+      var form = document.getElementById("prediction-form");
+      var submitButton = document.querySelector("input[type='submit']");
+
+      // Thêm sự kiện gửi form
+      form.addEventListener("submit", function (event) {
+        var formIsValid = true;
+
+        // Lặp qua từng nhóm checkbox
+        checkboxGroups.forEach(function (group) {
+          // Lấy tất cả các checkbox trong nhóm và phần tử chứa thông báo lỗi
+          var checkboxes = group.querySelectorAll('input[type="checkbox"]');
+          var errorMessage = group.querySelector(".error-message");
+
+          // Kiểm tra xem có ít nhất một checkbox được chọn không
+          var isChecked = false;
+          checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+              isChecked = true;
+            }
+          });
+
+          // Nếu không có checkbox nào được chọn, hiển thị thông báo lỗi tương ứng
+          if (!isChecked) {
+            errorMessage.style.display = "inline"; // Hiển thị thông báo lỗi
+
+            // Cuộn trang đến vị trí của nhóm checkbox chưa được chọn
+            group.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            formIsValid = false;
+          } else {
+            errorMessage.style.display = "none"; // Ẩn thông báo lỗi nếu có checkbox được chọn
+          }
+        });
+
+        // Nếu form không hợp lệ, ngăn chặn gửi form
+        if (!formIsValid) {
+          event.preventDefault(); // Ngăn chặn gửi form
+        }
+      });
+    </script>
+  </body>
+</html>

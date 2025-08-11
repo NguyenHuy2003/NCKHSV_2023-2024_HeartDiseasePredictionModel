@@ -1,0 +1,231 @@
+/* CSS cho chế độ sáng */
+body {
+    background-color: #ffffff;
+    color: #333333;
+}
+
+/* CSS cho chế độ tối */
+body.dark-mode {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+/* Định dạng cho option khi ở giao diện tối */
+body.dark-mode .container {
+    background-color: #333333;
+    color: #ffffff;
+    
+}
+
+/* Định dạng cho kết quả dự đoán khi ở giao diện tối */
+body.dark-mode #prediction-form label,
+body.dark-mode .result-container,
+body.dark-mode .result h2,
+body.dark-mode #result-content h3,
+body.dark-mode #result-content p,
+body.dark-mode #result-content ul {
+    color: #ffffff;
+}
+
+/* Thêm CSS cho các yếu tố khác tùy thuộc vào chế độ tối */
+
+/* Biểu tượng chuyển đổi chế độ */
+.toggle-dark-mode {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    cursor: pointer;
+    font-size: 24px;
+    color: #333333; /* Màu sắc của biểu tượng chế độ sáng */
+}
+
+body.dark-mode .toggle-dark-mode {
+    color: #ffffff; /* Màu sắc của biểu tượng chế độ tối */
+}
+
+/* Định dạng cho header */
+header {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Định dạng cho phần chính */
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Định dạng cho phần nhập liệu */
+.input-form {
+    margin-bottom: 20px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Ẩn kết quả ban đầu */
+.result {
+    display: none;
+}
+
+/* Định dạng cho tiêu đề kết quả */
+.result h2 {
+    margin-top: 20px;
+}
+
+/* Định dạng cho container */
+.container {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Định dạng cho tiêu đề h1 */
+h1 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 30px;
+}
+
+/* Định dạng cho nhãn label */
+label {
+    font-weight: bold;
+    color: #555;
+}
+
+/* Định dạng cho nút gửi */
+input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Định dạng cho phần hiển thị kết quả */
+.result-container {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Định dạng cho hình ảnh của bác sĩ */
+.doctor-image img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 20px;
+}
+
+/* Định dạng cho nội dung kết quả */
+#result-content p {
+    font-size: 18px;
+    color: #555;
+}
+
+/* Định dạng cho tiêu đề h2 */
+h2 {
+    font-size: 20px;
+    color: #007bff;
+    margin-top: 20px;
+}
+
+/* Định dạng cho tiêu đề h3 */
+h3 {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* Định dạng cho đoạn văn bản */
+p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* Định dạng cho danh sách */
+ul {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #666;
+    margin-top: 10px;
+    padding-left: 0;
+}
+
+/* Định dạng cho mỗi mục trong danh sách */
+ul li {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+/* Định dạng cho mỗi mục li trong danh sách ul */
+ul ul li {
+    list-style-type: circle;
+    margin-left: 20px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    display: none; /* Ẩn checkboxes mặc định */
+}
+
+.checkbox-group label {
+    display: inline-block;
+    vertical-align: middle; /* Cân xứng chữ theo chiều dọc */
+    margin-right: 10px; /* Khoảng cách giữa các checkboxes */
+    cursor: pointer;
+}
+
+/* Tạo giao diện checkboxes tùy chỉnh */
+.checkbox-group label::before {
+    content: "";
+    display: inline-block;
+    width: 20px; /* Kích thước checkboxes */
+    height: 20px;
+    border: 1px solid #ccc; /* Viền checkboxes */
+    margin-right: 5px; /* Khoảng cách giữa checkboxes và label */
+    vertical-align: middle; /* Cân xứng ô checkbox theo chiều dọc */
+    text-align: center; /* Canh chỉnh văn bản theo chiều ngang */
+    line-height: 20px;
+    background-color: #fff; /* Màu nền của checkboxes */
+    color: transparent; /* Màu chữ của checkboxes */
+    border-radius: 50%; /* Bo tròn góc của ô checkbox */
+}
+
+/* Định dạng giao diện checkboxes khi được chọn */
+.checkbox-group input[type="checkbox"]:checked + label::before {
+    background-color: #007bff; /* Màu nền của checkboxes khi được chọn */
+    color: #fff; /* Màu chữ của checkboxes khi được chọn */
+}
+
+span.error-message {
+    color: red; /* Màu chữ là đỏ */
+    font-size: 14px; /* Cỡ chữ là 14px */
+    font-style: italic; /* Chữ nghiêng */
+    display: none; /* Mặc định ẩn đi */
+}
+
